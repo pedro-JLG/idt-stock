@@ -32,14 +32,14 @@ class MovementController extends Controller
             }
             $product->stock = $next;
             $product->save();
-    
+
             $product->movements()->create([
                 'type' => $data['type'],
                 'quantity' => $data['quantity'],
                 'occurred_on' => $data['occurred_on'],
-                'supplier' => $data['supplier'],
-                'reason' => $data['reason'],
-                'user_id' => $data['user_id'],
+                'supplier' => $data['supplier'] ?? null,
+                'reason' => $data['reason'] ?? null,
+                'user_id' => $request->user()->id,
             ]);
         }, 3);
 

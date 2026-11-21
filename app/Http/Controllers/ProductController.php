@@ -14,21 +14,27 @@ class ProductController extends Controller
     {
         return view('inventory.product-form', ['product' => new Product]);
     }
+
     public function store(Request $request)
     {
         Product::create($this->data($request));
+
         return to_route('stock.index')->with('success', 'Producto creado.');
 
     }
-    public function edit(Product $request)
+
+    public function edit(Product $product)
     {
         return view('inventory.product-form', compact('product'));
     }
+
     public function update(Request $request, Product $product)
     {
         $product->update($this->data($request, $product));
+
         return to_route('stock.index')->with('success', 'Producto actualizado.');
     }
+
     public function destroy(Product $product)
     {
         DB::transaction(function () use ($product) {
@@ -40,12 +46,14 @@ class ProductController extends Controller
             }
             $current->delete();
         });
+
+        return to_route('stock.index')->with('success', 'Producto archivado.');
     }
 
     public function data(Request $request, ?Product $product = null): array
     {
-        $uniqueSku = Rule::unique('product', 'sku');
-        if($product !== null){
+        $uniqueSku = Rule::unique('products', 'sku');
+        if ($product !== null) {
             $uniqueSku->ignore($product);
         }
 
