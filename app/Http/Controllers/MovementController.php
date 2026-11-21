@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Movement;
 use App\Models\Product;
 use DB;
 use Illuminate\Http\Request;
@@ -9,6 +10,56 @@ use Illuminate\Validation\ValidationException;
 
 class MovementController extends Controller
 {
+    public function index(Request $request)
+    {
+        $filters = $request->validate([
+            'type' => ['nullable', 'in:in,out'],
+            'from' => ['nullable', 'date_format:Y-m-d'],
+            'to' => ['nullable', 'date_format:Y-m-d'],
+            'product' => ['nullable', 'integer'],
+        ]);
+
+        $history = Movement::with('product');
+
+        if ($type = $filters['type'] ?? null) {
+            $history->where('type', $type);
+        }
+
+        if ($from = $filters['from'] ?? null) {
+            $history->where('occurred_on', '>=', $from);
+        }
+
+        if ($to = $filters['to'] ?? null) {
+            $history->where('occurred_on', '<=', $to);
+        }
+
+        $filteredProduct = null;
+
+        if ($productId = $filters['product'] ?? null) {
+            $history->where('product_id', $productId);
+            $filteredProduct = Product::withTrashed()->find($productId);
+        }
+
+        return view('movements.index', [
+            'movements' => $history->latest('occurred_on')->latest('id')->paginate(15)->withQueryString(),
+            'filteredProduct' => $filteredProduct,
+        ]);
+    }
+
+    public function create(Request $request)
+    {
+        $filters = $request->validate([
+            'product_id' => ['nullable', 'integer'],
+            'type' => ['nullable', 'in:in,out'],
+        ]);
+
+        return view('movements.create', [
+            'options' => Product::orderBy('name')->get(['id', 'sku', 'name']),
+            'selectedProductId' => $filters['product_id'] ?? null,
+            'selectedType' => $filters['type'] ?? 'in',
+        ]);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([
@@ -43,6 +94,6 @@ class MovementController extends Controller
             ]);
         }, 3);
 
-        return to_route('stock.index')->with('success', 'Movimiento registrado');
+        return to_route('movements.index')->with('success', 'Movimiento registrado');
     }
 }

@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
+                    <a href="{{ route('stock.index') }}">
                         <x-application-mark class="block h-9 w-auto" />
                     </a>
                 </div>
@@ -16,11 +16,11 @@
                         <x-nav-link href="{{ route('stock.index') }}" :active="request()->routeIs('stock.*', 'products.*')">
                             Inventario
                         </x-nav-link>
-                    @endcan
 
-                    <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
+                        <x-nav-link href="{{ route('movements.index') }}" :active="request()->routeIs('movements.*')">
+                            Movimientos
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -149,11 +149,11 @@
                 <x-responsive-nav-link href="{{ route('stock.index') }}" :active="request()->routeIs('stock.*', 'products.*')">
                     Inventario
                 </x-responsive-nav-link>
-            @endcan
 
-            <x-responsive-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
+                <x-responsive-nav-link href="{{ route('movements.index') }}" :active="request()->routeIs('movements.*')">
+                    Movimientos
+                </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

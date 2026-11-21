@@ -12,20 +12,12 @@ Route::get('/', function () {
 Route::middleware(['auth', 'can:use-stock'])->group(function () {
     Route::get('/stock', [InventoryController::class, 'index'])->name('stock.index');
     Route::get('/stock/live', [InventoryController::class, 'live'])->name('stock.live');
+    Route::get('/movements', [MovementController::class, 'index'])->name('movements.index');
+    Route::get('/movements/create', [MovementController::class, 'create'])->name('movements.create');
     Route::post('/movements', [MovementController::class, 'store'])->name('movements.store');
 
     Route::middleware('can:manage-product')->group(function () {
         Route::resource('products', ProductController::class)
             ->only(['create', 'store', 'edit', 'update', 'destroy']);
     });
-});
-
-Route::middleware([
-    'auth:sanctum',
-    config('jetstream.auth_session'),
-    'verified',
-])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
 });

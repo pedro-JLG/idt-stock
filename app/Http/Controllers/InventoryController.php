@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Movement;
 use App\Models\Product;
 use Illuminate\Http\Request;
 
@@ -13,9 +12,6 @@ class InventoryController extends Controller
         $filters = $request->validate([
             'q' => ['nullable', 'string', 'max:80'],
             'category' => ['nullable', 'string', 'max:80'],
-            'type' => ['nullable', 'in:in,out'],
-            'from' => ['nullable', 'date_format:Y-m-d'],
-            'to' => ['nullable', 'date_format:Y-m-d'],
         ]);
 
         $catalog = Product::query();
@@ -31,26 +27,8 @@ class InventoryController extends Controller
             $catalog->where('category', $category);
         }
 
-        $history = Movement::with('product')->whereHas('product', function ($query) use ($catalog) {
-            $query->whereIn('products.id', (clone $catalog)->withTrashed()->select('products.id'));
-        });
-
-        if ($type = $filters['type'] ?? null) {
-            $history->where('type', $type);
-        }
-
-        if ($from = $filters['from'] ?? null) {
-            $history->where('occurred_on', '>=', $from);
-        }
-
-        if ($to = $filters['to'] ?? null) {
-            $history->where('occurred_on', '<=', $to);
-        }
-
         return view('inventory.index', [
-            'products' => $catalog->orderBy('name')->paginate(12, ['*'], 'catalog_page')->withQueryString(),
-            'movements' => $history->latest('occurred_on')->latest('id')->paginate(15, ['*'], 'history_page')->withQueryString(),
-            'options' => Product::orderBy('name')->get(['id', 'sku', 'name']),
+            'products' => $catalog->orderBy('name')->paginate(12, ['*'], 'page')->withQueryString(),
             'totals' => Product::query()->selectRaw('category, SUM(stock) as units')
                 ->groupBy('category')->orderBy('category')->get(),
         ]);
